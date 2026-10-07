@@ -77,11 +77,22 @@
       margin-left: auto;
     }
 
+    /* ── DEMO BANNER ────────────────────────── */
+    .demo-banner {
+      background: rgba(245,158,11,0.13);
+      border-top: 1px solid rgba(245,158,11,0.25);
+      padding: 8px 24px;
+      font-size: 12px;
+      color: #fbbf24;
+      text-align: center;
+    }
+    .demo-banner strong { font-weight: 600; }
+
     /* ── LAYOUT ─────────────────────────────── */
     main {
       max-width: 800px;
       margin: 0 auto;
-      padding: 88px 24px 64px;
+      padding: 110px 24px 64px;
       display: flex;
       flex-direction: column;
       gap: 20px;
@@ -217,7 +228,7 @@
 
     /* ── PREVIEW TABLE ──────────────────────── */
     .preview-wrap {
-      margin-top: 16px;
+      margin-top: 20px;
       overflow-x: auto;
       border-radius: 6px;
       border: 1px solid var(--border);
@@ -472,6 +483,9 @@
     <span class="header-title">Briefing Operativo</span>
     <span class="header-sub">Analisi settimanale KPI in 30 secondi</span>
   </div>
+  <div class="demo-banner">
+    ⚠ <strong>Strumento dimostrativo</strong> — I dati sono fittizi e l'azienda è simulata. I briefing generati sono a scopo illustrativo.
+  </div>
 </header>
 
 <main>
@@ -492,7 +506,7 @@
       <span class="file-sep">oppure</span>
       <button class="btn btn-demo" onclick="loadDemoData()">▶ Prova con dati demo</button>
     </div>
-    <div id="preview-block" style="display:none">
+    <div id="preview-block" style="display:none; margin-top:20px;">
       <p class="preview-meta" id="preview-meta"></p>
       <div class="preview-wrap">
         <table id="preview-table"></table>
@@ -504,7 +518,7 @@
   <div class="card">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
       <div class="card-title" style="margin-bottom:0;">2 — Contesto (opzionale)</div>
-      <button class="btn btn-demo" style="font-size:12px; padding:6px 12px;" onclick="loadDemoData()">▶ Dati demo</button>
+      <button class="btn btn-demo" style="font-size:12px; padding:6px 12px;" onclick="fillDemoContext()">▶ Dati demo</button>
     </div>
     <div class="row-2">
       <div class="field">
@@ -590,6 +604,9 @@
     parsedData = DEMO_DATA;
     renderPreview(DEMO_DATA.headers, DEMO_DATA.rows, 'kpi_demo_30set-06ott.csv', true);
     hideError();
+  }
+
+  function fillDemoContext() {
     document.getElementById('week-label').value   = '30/09 – 06/10/2026';
     document.getElementById('dept-label').value   = 'Metalmec Srl – Produzione Linea 2';
     document.getElementById('target-label').value = 'OEE > 85%, scarti < 15 pezzi/giorno, ticket chiusi entro 4h';
