@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Briefing Operativo — Alessandro Dardi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f8f9fa;
+      --card:      #ffffff;
+      --border:    #e5e7eb;
+      --text:      #111827;
+      --muted:     #6b7280;
+      --accent:    #2563eb;
+      --accent-h:  #1d4ed8;
+      --green:     #16a34a;
+      --orange:    #d97706;
+      --red:       #dc2626;
+      --radius:    8px;
+      --shadow:    0 1px 3px rgba(0,0,0,0.10);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+    }
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-brand {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .header-brand:hover { color: var(--accent); }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .header-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── LAYOUT ─────────────────────────────── */
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── CARD ───────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── FORM ELEMENTS ──────────────────────── */
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--card);
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus { border-color: var(--accent); }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 540px) { .row-2 { grid-template-columns: 1fr; } }
+
+    /* ── BUTTONS ────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: none;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-h); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--bg); }
+    .btn-lg {
+      padding: 13px 24px;
+      font-size: 15px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* ── API KEY STATUS ─────────────────────── */
+    .api-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--green);
+      font-weight: 500;
+    }
+    .api-status button {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+      text-decoration: underline;
+    }
+
+    /* ── DRAG & DROP ────────────────────────── */
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      position: relative;
+    }
+    .drop-zone:hover,
+    .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: #eff6ff;
+    }
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .drop-icon { font-size: 36px; margin-bottom: 10px; }
+    .drop-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .drop-hint { font-size: 13px; color: var(--muted); }
+
+    /* ── PREVIEW TABLE ──────────────────────── */
+    .preview-wrap {
+      margin-top: 16px;
+      overflow-x: auto;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .preview-meta {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      background: var(--bg);
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      white-space: nowrap;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    /* ── TOGGLE ─────────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+    }
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 22px;
+      transition: .2s;
+      cursor: pointer;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+    /* ── LOADER ─────────────────────────────── */
+    .loader {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--muted);
+      padding: 16px 0;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── REPORT ─────────────────────────────── */
+    #report { display: none; }
+    .report-header {
+      background: var(--text);
+      color: #fff;
+      border-radius: var(--radius) var(--radius) 0 0;
+      padding: 20px 24px;
+    }
+    .report-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .report-meta { font-size: 13px; opacity: .65; }
+
+    .report-body { padding: 0; }
+    .report-section {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+    }
+    .report-section:last-child { border-bottom: none; }
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 10px;
+    }
+    .section-label.green  { color: var(--green); }
+    .section-label.orange { color: var(--orange); }
+    .section-label.blue   { color: var(--accent); }
+    .section-label.dark   { color: var(--text); }
+    .section-label.purple { color: #7c3aed; }
+
+    .exec-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .report-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .report-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+    }
+    .report-list li::before {
+      content: '•';
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+    .list-green li::before  { color: var(--green); }
+    .list-orange li::before { color: var(--orange); }
+    .list-blue li::before   { color: var(--accent); }
+    .list-purple li::before { color: #7c3aed; }
+
+    .numbered-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      counter-reset: item;
+    }
+    .numbered-list li {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      counter-increment: item;
+    }
+    .numbered-list li::before {
+      content: counter(item) '.';
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      min-width: 18px;
+    }
+
+    .empty-note {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 10px;
+      padding: 20px 24px 0;
+      flex-wrap: wrap;
+    }
+
+    /* ── ERROR ──────────────────────────────── */
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-size: 14px;
+      color: var(--red);
+      display: none;
+    }
+
+    /* ── FOOTER ─────────────────────────────── */
+    footer {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px 32px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media print {
+      header, .card:not(#report-card), footer, .report-actions { display: none !important; }
+      #report-card { box-shadow: none; border: none; }
+      body, main { background: #fff; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a href="https://alessandrodardi-1982.github.io/portfolio/" class="header-brand">Alessandro Dardi</a>
+    <span class="header-title">Briefing Operativo</span>
+    <span class="header-sub">Analisi settimanale KPI in 30 secondi</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── STEP 1: API KEY ── -->
+  <div class="card" id="api-card">
+    <div class="card-title">1 — Chiave API Claude</div>
+    <div id="api-input-block">
+      <div class="field">
+        <label for="api-key">La tua chiave API Claude (Anthropic)</label>
+        <input type="password" id="api-key" placeholder="sk-ant-..." autocomplete="off" />
+        <p class="hint">Viene usata solo in questa sessione del browser. Non viene mai salvata.</p>
+      </div>
+      <button class="btn btn-primary" onclick="saveApiKey()">Salva per questa sessione</button>
+    </div>
+    <div id="api-saved-block" style="display:none">
+      <div class="api-status">
+        <span>✅ Chiave API: ●●●●●●●●</span>
+        <button onclick="resetApiKey()">Cambia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: FILE ── -->
+  <div class="card">
+    <div class="card-title">2 — Carica il file KPI</div>
+    <div class="drop-zone" id="drop-zone"
+         ondragover="handleDragOver(event)"
+         ondragleave="handleDragLeave(event)"
+         ondrop="handleDrop(event)">
+      <input type="file" id="file-input" accept=".xlsx,.xls,.csv" onchange="handleFileInput(event)" />
+      <div class="drop-icon">📂</div>
+      <div class="drop-label">Trascina qui il tuo file Excel o CSV</div>
+      <div class="drop-hint">oppure clicca per scegliere · .xlsx · .xls · .csv</div>
+    </div>
+    <div id="preview-block" style="display:none">
+      <p class="preview-meta" id="preview-meta"></p>
+      <div class="preview-wrap">
+        <table id="preview-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: CONFIG ── -->
+  <div class="card">
+    <div class="card-title">3 — Contesto (opzionale)</div>
+    <div class="row-2">
+      <div class="field">
+        <label for="week-label">Settimana di riferimento</label>
+        <input type="text" id="week-label" placeholder="es. 30/09 – 06/10/2026" />
+      </div>
+      <div class="field">
+        <label for="dept-label">Azienda / Reparto</label>
+        <input type="text" id="dept-label" placeholder="es. Produzione – Linea 3" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="target-label">Target settimanale principale</label>
+      <input type="text" id="target-label" placeholder="es. OEE > 85%, tempo medio ticket < 4h" />
+    </div>
+    <div class="field">
+      <label for="notes-label">Note aggiuntive per l'AI</label>
+      <input type="text" id="notes-label" placeholder="es. lunedì era festivo, ignora il calo del giorno" />
+    </div>
+    <div class="toggle-row">
+      <label class="toggle">
+        <input type="checkbox" id="exec-toggle" checked />
+        <span class="toggle-slider"></span>
+      </label>
+      <span>Includi executive summary (1 riga per il CEO)</span>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: GENERA ── -->
+  <div>
+    <div class="error-box" id="error-box"></div>
+    <div class="loader" id="loader" style="display:none">
+      <div class="spinner"></div>
+      <span>Analisi in corso… solitamente 5–15 secondi</span>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="generateBriefing()" id="gen-btn">
+      ⚡ Genera briefing
+    </button>
+  </div>
+
+  <!-- ── STEP 5: REPORT ── -->
+  <div class="card" id="report-card" style="padding:0; overflow:hidden; display:none">
+    <div class="report-header">
+      <div class="report-title">📊 Briefing Operativo</div>
+      <div class="report-meta" id="report-meta"></div>
+    </div>
+    <div class="report-body" id="report-body"></div>
+    <div class="report-actions">
+      <button class="btn btn-ghost" onclick="copyReport()">📋 Copia testo</button>
+      <button class="btn btn-ghost" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
+      <button class="btn btn-ghost" onclick="resetReport()">🔄 Nuovo report</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Strumento sperimentale · I dati non vengono salvati né condivisi ·
+  La chiave API è tua e resta nel browser per tutta la sessione ·
+  Costruito da <a href="https://alessandrodardi-1982.github.io/portfolio/">Alessandro Dardi</a> —
+  Portfolio A13 · Modello: claude-haiku-4-5-20251001
+</footer>
+
+<script>
+  /* ── GLOBALS ────────────────────────────────────────────── */
+  let parsedData = null; // { headers: [], rows: [[]], totalRows: 0 }
+
+  /* ── API KEY ─────────────────────────────────────────────── */
+  function saveApiKey() {
+    const key = document.getElementById('api-key').value.trim();
+    if (!key.startsWith('sk-ant-')) {
+      showError('La chiave deve iniziare con "sk-ant-"');
+      return;
+    }
+    sessionStorage.setItem('claude_api_key', key);
+    document.getElementById('api-key').value = '';
+    document.getElementById('api-input-block').style.display = 'none';
+    document.getElementById('api-saved-block').style.display = 'block';
+    hideError();
+  }
+
+  function resetApiKey() {
+    sessionStorage.removeItem('claude_api_key');
+    document.getElementById('api-input-block').style.display = 'block';
+    document.getElementById('api-saved-block').style.display = 'none';
+  }
+
+  /* ── FILE HANDLING ──────────────────────────────────────── */
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.add('drag-over');
+  }
+  function handleDragLeave(e) {
+    document.getElementById('drop-zone').classList.remove('drag-over');
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processFile(file);
+  }
+  function handleFileInput(e) {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  }
+
+  function processFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        if (raw.length < 2) { showError('Il file sembra vuoto o non ha righe di dati.'); return; }
+
+        const headers = raw[0].map(String);
+        const rows = raw.slice(1).filter(r => r.some(c => c !== ''));
+        parsedData = { headers, rows, totalRows: rows.length };
+        renderPreview(headers, rows, file.name);
+        hideError();
+      } catch(err) {
+        showError('Impossibile leggere il file: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function renderPreview(headers, rows, filename) {
+    const preview = rows.slice(0, 5);
+    let html = '<thead><tr>' + headers.map(h => `<th>${escHtml(h)}</th>`).join('') + '</tr></thead>';
+    html += '<tbody>' + preview.map(r =>
+      '<tr>' + headers.map((_, i) => `<td>${escHtml(String(r[i] ?? ''))}</td>`).join('') + '</tr>'
+    ).join('') + '</tbody>';
+
+    document.getElementById('preview-table').innerHTML = html;
+    document.getElementById('preview-meta').textContent =
+      `📄 ${filename} · ${rows.length} righe · ${headers.length} colonne${rows.length > 5 ? ' · (prime 5 righe)' : ''}`;
+    document.getElementById('preview-block').style.display = 'block';
+  }
+
+  /* ── DATA SERIALIZATION ─────────────────────────────────── */
+  function dataToText(data) {
+    const { headers, rows } = data;
+    const MAX_ROWS = 50;
+    const sample = rows.slice(0, MAX_ROWS);
+    const lines = [headers.join(' | ')];
+    sample.forEach(r => lines.push(headers.map((_, i) => String(r[i] ?? '')).join(' | ')));
+    return lines.join('\n');
+  }
+
+  /* ── GENERATE ───────────────────────────────────────────── */
+  async function generateBriefing() {
+    hideError();
+
+    const apiKey = sessionStorage.getItem('claude_api_key');
+    if (!apiKey) { showError('Inserisci prima la chiave API Claude (Step 1).'); return; }
+    if (!parsedData) { showError('Carica prima un file Excel o CSV (Step 2).'); return; }
+
+    const week   = document.getElementById('week-label').value.trim();
+    const dept   = document.getElementById('dept-label').value.trim();
+    const target = document.getElementById('target-label').value.trim();
+    const notes  = document.getElementById('notes-label').value.trim();
+    const withExec = document.getElementById('exec-toggle').checked;
+
+    setLoading(true);
+    document.getElementById('report-card').style.display = 'none';
+
+    const tableText = dataToText(parsedData);
+
+    const systemPrompt =
+      `Sei un assistente specializzato in analisi operativa per responsabili di produzione e service nelle PMI industriali. ` +
+      `Analizzi dati settimanali di KPI operativi e generi briefing strutturati per riunioni operative del lunedì mattina. ` +
+      `Rispondi sempre in italiano. Sii diretto e concreto. ` +
+      `Non aggiungere frasi di introduzione o conclusione al JSON. Restituisci solo JSON puro, senza markdown.`;
+
+    let userPrompt =
+      `Analizza i seguenti dati KPI${week ? ` della settimana ${week}` : ''}.`;
+    if (target) userPrompt += `\nIl target principale è: ${target}.`;
+    if (notes)  userPrompt += `\nNote contestuali: ${notes}.`;
+    userPrompt += `\n\nDati in formato tabellare:\n${tableText}\n\n`;
+    userPrompt += `Genera un briefing operativo in formato JSON con questa struttura esatta:\n`;
+    userPrompt += `{\n`;
+    if (withExec) userPrompt += `  "executive_summary": "Una frase di massimo 20 parole per il CEO",\n`;
+    userPrompt += `  "cosa_ha_funzionato": ["punto 1", "punto 2"],\n`;
+    userPrompt += `  "cosa_non_ha_funzionato": ["punto 1", "punto 2"],\n`;
+    userPrompt += `  "anomalie": ["eventuale anomalia o pattern"],\n`;
+    userPrompt += `  "punti_riunione": ["punto 1", "punto 2", "punto 3"]\n`;
+    userPrompt += `}\n`;
+    userPrompt += `Ogni array deve avere 2-4 elementi, concreti e specifici ai dati forniti. ` +
+                  `Se una sezione non ha elementi rilevanti, restituisci array vuoto [].`;
+
+    try {
+      const res = await fetch('/api/claude', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key':    apiKey
+        },
+        body: JSON.stringify({
+          model:      'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          system:     systemPrompt,
+          messages:   [{ role: 'user', content: userPrompt }]
+        })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error?.message || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const rawText = data.content?.[0]?.text ?? '';
+      const parsed = parseJson(rawText);
+      if (!parsed) throw new Error('Risposta non valida dall\'AI. Riprova.');
+
+      renderReport(parsed, week, dept, withExec);
+    } catch(err) {
+      showError('Errore durante la generazione: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function parseJson(text) {
+    try { return JSON.parse(text.trim()); } catch(_) {}
+    const m = text.match(/```json\s*([\s\S]*?)```/i) || text.match(/```\s*([\s\S]*?)```/i);
+    if (m) { try { return JSON.parse(m[1].trim()); } catch(_) {} }
+    const m2 = text.match(/\{[\s\S]*\}/);
+    if (m2) { try { return JSON.parse(m2[0]); } catch(_) {} }
+    return null;
+  }
+
+  /* ── RENDER REPORT ──────────────────────────────────────── */
+  function renderReport(data, week, dept, withExec) {
+    const now = new Date().toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' });
+    let meta = `Generato il ${now}`;
+    if (week) meta = `Settimana ${week} · ` + meta;
+    if (dept) meta += ` · ${dept}`;
+    document.getElementById('report-meta').textContent = meta;
+
+    let html = '';
+
+    if (withExec && data.executive_summary) {
+      html += section('📌 EXECUTIVE SUMMARY', 'dark',
+        `<p class="exec-text">"${escHtml(data.executive_summary)}"</p>`);
+    }
+
+    html += section('✅ COSA HA FUNZIONATO', 'green',
+      listHtml(data.cosa_ha_funzionato, 'list-green'));
+
+    html += section('⚠️ COSA NON HA FUNZIONATO', 'orange',
+      listHtml(data.cosa_non_ha_funzionato, 'list-orange'));
+
+    if (data.anomalie?.length) {
+      html += section('🔍 ANOMALIE / PATTERN', 'purple',
+        listHtml(data.anomalie, 'list-purple'));
+    }
+
+    html += section('📋 PUNTI DA PORTARE IN RIUNIONE', 'blue',
+      numberedListHtml(data.punti_riunione));
+
+    document.getElementById('report-body').innerHTML = html;
+    document.getElementById('report-card').style.display = 'block';
+    document.getElementById('report-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function section(title, colorClass, inner) {
+    return `<div class="report-section">
+      <div class="section-label ${colorClass}">${title}</div>
+      ${inner}
+    </div>`;
+  }
+
+  function listHtml(arr, cls) {
+    if (!arr?.length) return `<p class="empty-note">Nessun elemento rilevato.</p>`;
+    return `<ul class="report-list ${cls}">${arr.map(i => `<li>${escHtml(i)}</li>`).join('')}</ul>`;
+  }
+
+  function numberedListHtml(arr) {
+    if (!arr?.length) return `<p class="empty-note">Nessun punto rilevato.</p>`;
+    return `<ol class="numbered-list">${arr.map(i => `<li>${escHtml(i)}</li>`).join('')}</ol>`;
+  }
+
+  /* ── ACTIONS ────────────────────────────────────────────── */
+  function copyReport() {
+    const meta = document.getElementById('report-meta').textContent;
+    const sections = document.querySelectorAll('.report-section');
+    let text = `BRIEFING OPERATIVO\n${meta}\n\n`;
+    sections.forEach(s => {
+      const label = s.querySelector('.section-label')?.textContent ?? '';
+      text += label + '\n';
+      s.querySelectorAll('li, .exec-text').forEach(el => {
+        text += '  ' + el.textContent.trim() + '\n';
+      });
+      text += '\n';
+    });
+    navigator.clipboard.writeText(text.trim())
+      .then(() => alert('Testo copiato negli appunti!'))
+      .catch(() => alert('Impossibile copiare: usa Ctrl+A e Ctrl+C sulla sezione del report.'));
+  }
+
+  function resetReport() {
+    document.getElementById('report-card').style.display = 'none';
+    parsedData = null;
+    document.getElementById('preview-block').style.display = 'none';
+    document.getElementById('file-input').value = '';
+    document.getElementById('week-label').value = '';
+    document.getElementById('dept-label').value = '';
+    document.getElementById('target-label').value = '';
+    document.getElementById('notes-label').value = '';
+    document.getElementById('exec-toggle').checked = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── HELPERS ────────────────────────────────────────────── */
+  function setLoading(on) {
+    document.getElementById('loader').style.display = on ? 'flex' : 'none';
+    document.getElementById('gen-btn').disabled = on;
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('error-box');
+    box.textContent = '⚠️ ' + msg;
+    box.style.display = 'block';
+  }
+
+  function hideError() {
+    document.getElementById('error-box').style.display = 'none';
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* ── INIT ────────────────────────────────────────────────── */
+  if (sessionStorage.getItem('claude_api_key')) {
+    document.getElementById('api-input-block').style.display = 'none';
+    document.getElementById('api-saved-block').style.display = 'block';
+  }
+</script>
+</body>
+</html>
