@@ -5,20 +5,19 @@ exports.handler = async (event) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type, x-api-key',
+        'Access-Control-Allow-Headers': 'Content-Type',
       },
       body: ''
     };
   }
 
   try {
-    // La chiave API arriva dall'header della richiesta (inserita dall'utente nel browser)
-    const apiKey = event.headers['x-api-key'];
+    const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return {
-        statusCode: 401,
+        statusCode: 500,
         headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ error: 'Chiave API mancante.' })
+        body: JSON.stringify({ error: 'Chiave API non configurata sul server.' })
       };
     }
 
